@@ -44,9 +44,11 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install JavaScript dependencies
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter=artifacts/pdf-audiobook-reader add -D babel-preset-expo
+        run: pnpm install --frozen-lockfile
+
+      - name: Force install missing expo preset
+        working-directory: ${{ env.APP_DIR }}
+        run: pnpm add -D babel-preset-expo
 
       - name: Set the requested Android version code
         working-directory: ${{ env.APP_DIR }}
