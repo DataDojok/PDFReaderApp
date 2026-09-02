@@ -39,8 +39,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
-          cache-dependency-path: artifacts/pdf-audiobook-reader/android/build.gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
