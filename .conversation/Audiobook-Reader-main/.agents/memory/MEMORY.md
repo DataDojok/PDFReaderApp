@@ -1,0 +1,2 @@
+- [Premium narration boundary](premium-narration-boundary.md) — keep device voices free; gate ElevenLabs neural narration behind a RevenueCat entitlement.
+- [Expo PDF.js workers](pdfjs-expo-worker.md) — PDF.js 6 needs its worker module registered for Expo; a browser-only worker URL fails during mobile imports.
