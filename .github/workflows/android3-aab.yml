@@ -17,8 +17,7 @@ jobs:
     name: Build signed release bundle
     runs-on: ubuntu-latest
     env:
-      # FIX: Pointing this directly to the main root folder of your checked-out repository
-      APP_DIR: .
+      APP_DIR: artifacts/pdf-audiobook-reader
 
     steps:
       - name: Check out source
@@ -83,8 +82,8 @@ jobs:
         run: |
           if [ -f scripts/prepare-android-signing.mjs ]; then
             node scripts/prepare-android-signing.mjs
-          elif [ -f ../scripts/prepare-android-signing.mjs ]; then
-            node ../scripts/prepare-android-signing.mjs
+          elif [ -f ../../scripts/prepare-android-signing.mjs ]; then
+            node ../../scripts/prepare-android-signing.mjs
           else
             echo "Signing script not found, continuing..."
           fi
@@ -92,7 +91,7 @@ jobs:
       - name: Build the signed AAB
         working-directory: ${{ env.APP_DIR }}/android
         env:
-          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/upload-keystore.p12
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/artifacts/pdf-audiobook-reader/android/app/upload-keystore.p12
           ANDROID_KEYSTORE_TYPE: PKCS12
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
