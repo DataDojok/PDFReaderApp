@@ -48,7 +48,7 @@ jobs:
 
       - name: Force install missing expo preset
         working-directory: ${{ env.APP_DIR }}
-        run: pnpm add -D babel-preset-expo @babel/preset-env
+        run: pnpm add -D babel-preset-expo
 
       - name: Set the requested Android version code
         working-directory: ${{ env.APP_DIR }}
