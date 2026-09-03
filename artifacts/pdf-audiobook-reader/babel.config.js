@@ -2,9 +2,16 @@ module.exports = function (api) {
   api.cache(true);
   return {
     presets: [
-      '@babel/preset-env',
-      'babel-preset-expo'
+      [
+        'babel-preset-expo',
+        {
+          // Natively handles modern private properties without conflicting with reanimated
+          unstable_transformProfile: 'hermes-stable'
+        }
+      ]
     ],
-    plugins: []
+    plugins: [
+      // If you use reanimated, its plugin must be listed at the very end of this array
+    ]
   };
 };
