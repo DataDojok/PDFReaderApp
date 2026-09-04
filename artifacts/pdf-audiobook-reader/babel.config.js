@@ -1,7 +1,15 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [['babel-preset-expo', { unstable_transformImportMeta: true }]],
+    presets: [
+      [
+        'babel-preset-expo',
+        {
+          unstable_transformImportMeta: true,
+          lazyImports: true
+        }
+      ]
+    ],
     plugins: [
       ['@babel/plugin-transform-class-static-block', { loose: true }],
       ['@babel/plugin-transform-class-properties', { loose: true }],
