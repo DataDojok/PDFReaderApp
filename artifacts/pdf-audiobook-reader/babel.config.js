@@ -3,10 +3,10 @@ module.exports = function (api) {
   return {
     presets: [['babel-preset-expo', { unstable_transformImportMeta: true }]],
     plugins: [
-      ['@babel/plugin-transform-class-static-block'],
-      ["@babel/plugin-transform-private-methods", { "loose": true }],
-      ["@babel/plugin-transform-private-property-in-object", { "loose": true }],
-      ["@babel/plugin-transform-class-properties", { "loose": true }]
+      ['@babel/plugin-transform-class-static-block', { loose: true }],
+      ['@babel/plugin-transform-class-properties', { loose: true }],
+      ['@babel/plugin-transform-private-methods', { loose: true }],
+      ['@babel/plugin-transform-private-property-in-object', { loose: true }]
     ]
   };
 };
