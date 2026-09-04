@@ -38,17 +38,14 @@ function installPdfJsCompatibility() {
     DOMException?: typeof DOMException;
   };
   if (runtimeGlobal.DOMException) return;
-
   class ReactNativeDOMException extends Error {
     name: string;
     code = 0;
-
     constructor(message = '', name = 'Error') {
       super(message);
       this.name = name;
     }
   }
-
   runtimeGlobal.DOMException = ReactNativeDOMException as unknown as typeof DOMException;
 }
 
@@ -61,10 +58,8 @@ function installPromiseResolversCompatibility() {
   type PromiseConstructorWithResolvers = {
     withResolvers?: <T>() => PromiseResolvers<T>;
   };
-
   const promiseConstructor = Promise as unknown as PromiseConstructorWithResolvers;
   if (typeof promiseConstructor.withResolvers === 'function') return;
-
   promiseConstructor.withResolvers = <T>() => {
     let resolve!: (value: T | PromiseLike<T>) => void;
     let reject!: (reason?: unknown) => void;
@@ -82,11 +77,9 @@ function installStructuredCloneCompatibility() {
   type RuntimeGlobal = {
     structuredClone?: CloneFunction & { __pdfjsNullSafe?: boolean };
   };
-
   const runtimeGlobal = globalThis as unknown as RuntimeGlobal;
   const currentClone = runtimeGlobal.structuredClone;
   if (!currentClone || currentClone.__pdfjsNullSafe) return;
-
   const safeClone = ((value: unknown, options?: CloneOptions) => (
     currentClone(value, options ?? undefined)
   )) as CloneFunction & { __pdfjsNullSafe?: boolean };
@@ -98,18 +91,14 @@ async function loadPdfJs() {
   installPdfJsCompatibility();
   installPromiseResolversCompatibility();
   installStructuredCloneCompatibility();
-  // Dynamic import - only executed on web in browser context
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const runtimeGlobal = globalThis as typeof globalThis & {
     pdfjsWorker?: unknown;
   };
-
   if (!runtimeGlobal.pdfjsWorker) {
     try {
       runtimeGlobal.pdfjsWorker = await import('pdfjs-dist/legacy/build/pdf.worker.mjs');
-    } catch {
-      // Gracefully handle worker loading failure
-    }
+    } catch {}
   }
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
@@ -122,7 +111,6 @@ function decodeBase64(base64: string): Uint8Array {
   const output: number[] = [];
   let buffer = 0;
   let bits = 0;
-
   for (const character of base64.replace(/[^A-Za-z0-9+/=]/g, '')) {
     if (character === '=') break;
     const value = alphabet.indexOf(character);
@@ -149,10 +137,7 @@ function cleanExtractedText(raw: string): string {
 }
 
 function getTextItemString(item: unknown): string {
-  return typeof item === 'object' && item !== null && 'str' in item
-    && typeof item.str === 'string'
-    ? item.str
-    : '';
+  return typeof item === 'object' && item !== null && 'str' in item && typeof item.str === 'string' ? item.str : '';
 }
 
 async function extractPdfText(bytes: Uint8Array): Promise<string> {
@@ -165,14 +150,12 @@ async function extractPdfText(bytes: Uint8Array): Promise<string> {
     verbosity: 0,
   }).promise;
   const pages: string[] = [];
-
   try {
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
       const content = await page.getTextContent();
       const lines: string[] = [];
       let lastY: number | undefined;
-
       for (const item of content.items) {
         const value = getTextItemString(item).trim();
         if (!value) continue;
@@ -185,24 +168,17 @@ async function extractPdfText(bytes: Uint8Array): Promise<string> {
         lines.push(value);
         lastY = y;
       }
-
       const pageText = cleanExtractedText(lines.join(' '));
       if (pageText) pages.push(pageText);
     }
   } finally {
     await document.cleanup();
   }
-
   return pages.join('\n\n');
 }
 
 function titleFromFilename(filename: string): string {
-  return filename
-    .replace(/\.pdf$/i, '')
-    .replace(/\s+\d{10,}$/, '')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim() || 'Untitled book';
+  return filename.replace(/\.pdf$/i, '').replace(/\s+\d{10,}$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Untitled book';
 }
 
 function isHeading(line: string): boolean {
@@ -213,22 +189,15 @@ function isHeading(line: string): boolean {
 }
 
 function titleFromText(lines: string[], filename: string): string {
-  const filenameWords = titleFromFilename(filename)
-    .toLocaleLowerCase()
-    .split(/\s+/)
-    .filter((word) => word.length > 2);
+  const filenameWords = titleFromFilename(filename).toLocaleLowerCase().split(/\s+/).filter((word) => word.length > 2);
   const matchingLine = lines.slice(0, 80)
     .map((line) => line.trim())
     .filter((line) => line.length >= 3 && line.length <= 90)
     .map((line) => ({
       line,
-      score: filenameWords.reduce(
-        (score, word) => score + (line.toLocaleLowerCase().includes(word) ? 1 : 0),
-        0,
-      ),
+      score: filenameWords.reduce((score, word) => score + (line.toLocaleLowerCase().includes(word) ? 1 : 0), 0),
     }))
     .sort((a, b) => b.score - a.score)[0];
-
   return matchingLine && matchingLine.score >= Math.max(2, filenameWords.length - 1)
     ? matchingLine.line.replace(/[.!?]+$/, '')
     : titleFromFilename(filename);
@@ -239,15 +208,12 @@ export function structureBook(text: string, filename: string): ParsedBook {
   const title = titleFromText(lines, filename);
   const titleIndex = lines.findIndex((line) => line === title);
   const authorCandidate = titleIndex > 0 ? lines[titleIndex - 1] : '';
-  const author = authorCandidate && authorCandidate.length < 80 && !isHeading(authorCandidate)
-    ? authorCandidate
-    : 'Imported PDF';
+  const author = authorCandidate && authorCandidate.length < 80 && !isHeading(authorCandidate) ? authorCandidate : 'Imported PDF';
   const contentLines = titleIndex >= 0 ? [...lines.slice(0, titleIndex), ...lines.slice(titleIndex + 1)] : lines;
   const sections: ParsedSection[] = [];
   let currentTitle = 'Opening pages';
   let currentKind: ParsedSection['kind'] = 'body';
   let currentLines: string[] = [];
-
   const flush = () => {
     const sectionText = currentLines.join(' ').replace(/\s+/g, ' ').trim();
     if (sectionText) {
@@ -260,7 +226,6 @@ export function structureBook(text: string, filename: string): ParsedBook {
     }
     currentLines = [];
   };
-
   for (const line of contentLines) {
     if (isHeading(line)) {
       flush();
@@ -271,12 +236,8 @@ export function structureBook(text: string, filename: string): ParsedBook {
     }
   }
   flush();
-
-  const safeSections = sections.length > 0
-    ? sections
-    : [{ id: '0-opening-pages', title: 'Opening pages', kind: 'body' as const, text: text.replace(/\s+/g, ' ').trim() }];
+  const safeSections = sections.length > 0 ? sections : [{ id: '0-opening-pages', title: 'Opening pages', kind: 'body' as const, text: text.replace(/\s+/g, ' ').trim() }];
   const wordCount = safeSections.reduce((total, section) => total + section.text.split(/\s+/).filter(Boolean).length, 0);
-
   return {
     title,
     author,
@@ -288,11 +249,8 @@ export function structureBook(text: string, filename: string): ParsedBook {
 }
 
 export async function parsePdf(uri: string, filename: string): Promise<ParsedBook> {
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
   const text = await extractPdfText(decodeBase64(base64));
-
   if (!text || text.length < 20) {
     throw new Error('This PDF does not contain selectable text. Try a text-based PDF or run OCR before importing it.');
   }
