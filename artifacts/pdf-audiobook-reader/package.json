@@ -58,9 +58,9 @@
     "typescript": "~5.9.2",
     "zod": "catalog:",
     "zod-validation-error": "^3.4.0",
-    "pdfjs-dist": "^6.3.289",
-    },
-    "babel": {
+    "pdfjs-dist": "^6.3.289"
+     },
+  "babel": {
     "presets": [
       "babel-preset-expo"
     ],
