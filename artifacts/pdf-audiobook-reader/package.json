@@ -62,5 +62,5 @@
     "zod": "catalog:",
     "zod-validation-error": "^3.4.0",
     "pdfjs-dist": "^6.3.289"
-     },
+     }
 }
