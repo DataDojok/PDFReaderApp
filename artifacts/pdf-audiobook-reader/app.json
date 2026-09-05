@@ -17,8 +17,10 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "com.pdfvoicereader.app",
-      "versionCode": 1
+    "package": "com.pdfvoicereader.app",
+    "versionCode": 1,
+    "compileSdkVersion": 36,
+    "targetSdkVersion": 36
     },
     "web": {
       "favicon": "./assets/images/icon.png"
